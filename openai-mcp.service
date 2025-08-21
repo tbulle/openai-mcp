@@ -1,0 +1,29 @@
+[Unit]
+Description=OpenAI MCP Bridge Server
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/openai-mcp
+ExecStart=/usr/bin/node /opt/openai-mcp/server.js
+Restart=always
+RestartSec=10
+
+# Environment variables
+Environment="NODE_ENV=production"
+EnvironmentFile=/opt/openai-mcp/.env
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/openai-mcp
+
+[Install]
+WantedBy=multi-user.target
