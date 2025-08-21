@@ -6,6 +6,9 @@
 
 #### A. SSH into your server
 ```bash
+# Replace with YOUR actual server address:
+# - Domain: ssh user@mcp.example.com
+# - IP: ssh user@192.168.1.100
 ssh user@your-server.com
 ```
 
@@ -15,8 +18,8 @@ ssh user@your-server.com
 mkdir -p ~/services
 cd ~/services
 
-# Clone this repository (or copy files)
-git clone https://github.com/yourusername/openai-mcp.git
+# Clone this repository
+git clone https://github.com/tbulle/openai-mcp.git
 cd openai-mcp
 
 # Make scripts executable

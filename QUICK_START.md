@@ -4,11 +4,12 @@
 
 ### 1️⃣ On Your Server
 ```bash
-# SSH to your server
+# SSH to your server (use YOUR actual server address)
+# Example: ssh user@192.168.1.100 or ssh user@mcp.mydomain.com
 ssh user@your-server.com
 
 # Get the code
-git clone https://github.com/yourusername/openai-mcp.git
+git clone https://github.com/tbulle/openai-mcp.git
 cd openai-mcp
 
 # Deploy (generates API key automatically)
