@@ -4,18 +4,29 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import {
+  ListToolsRequestSchema,
+  CallToolRequestSchema
+} from '@modelcontextprotocol/sdk/types.js';
 
 // Load environment variables
 dotenv.config();
 
-// Initialize OpenAI client (will be set up during initialization)
-let openaiClient = null;
+// Get API key from environment
+const apiKey = process.env.OPENAI_API_KEY;
+if (!apiKey) {
+  console.error('Error: OPENAI_API_KEY environment variable is required');
+  process.exit(1);
+}
 
-// Create server instance
+// Initialize OpenAI client
+const openaiClient = new OpenAI({ apiKey });
+
+// Create MCP server instance
 const server = new Server(
   {
     name: 'openai-mcp',
-    version: '1.0.0',
+    version: '2.0.0',
   },
   {
     capabilities: {
@@ -24,115 +35,84 @@ const server = new Server(
   }
 );
 
-// Handle initialization
-server.setRequestHandler('initialize', async (request) => {
-  // Get OpenAI API key from environment or initialization params
-  const apiKey = process.env.OPENAI_API_KEY || request.params?.config?.openaiApiKey;
-  
-  if (!apiKey) {
-    console.error('No OpenAI API key provided');
-    throw new Error('OpenAI API key required. Set OPENAI_API_KEY env var or pass in config.');
-  }
-  
-  // Initialize OpenAI client
-  openaiClient = new OpenAI({ apiKey });
-  console.error('OpenAI MCP server initialized');
-  
-  return {
-    protocolVersion: '0.1.0',
-    capabilities: {
-      tools: {},
-    },
-    serverInfo: {
-      name: 'openai-mcp',
-      version: '1.0.0',
-    },
-  };
-});
-
-// List available tools
-server.setRequestHandler('tools/list', async () => {
-  return {
-    tools: [
-      {
-        name: 'chat_completion',
-        description: 'Create a chat completion using OpenAI GPT models',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            model: {
-              type: 'string',
-              description: 'Model to use (e.g., gpt-4, gpt-3.5-turbo)',
-              default: 'gpt-3.5-turbo',
-            },
-            messages: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  role: {
-                    type: 'string',
-                    enum: ['system', 'user', 'assistant'],
-                  },
-                  content: {
-                    type: 'string',
-                  },
+// Set up handlers
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
+  tools: [
+    {
+      name: 'chat_completion',
+      description: 'Create a chat completion using OpenAI GPT models',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          model: {
+            type: 'string',
+            default: 'gpt-3.5-turbo',
+            description: 'Model to use (e.g., gpt-4, gpt-3.5-turbo)'
+          },
+          messages: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                role: {
+                  type: 'string',
+                  enum: ['system', 'user', 'assistant']
                 },
-                required: ['role', 'content'],
+                content: {
+                  type: 'string'
+                }
               },
-            },
-            temperature: {
-              type: 'number',
-              description: 'Sampling temperature (0-2)',
-              default: 0.7,
-            },
-            max_tokens: {
-              type: 'number',
-              description: 'Maximum tokens to generate',
-            },
+              required: ['role', 'content']
+            }
           },
-          required: ['messages'],
-        },
-      },
-      {
-        name: 'list_models',
-        description: 'List available OpenAI models',
-        inputSchema: {
-          type: 'object',
-          properties: {},
-        },
-      },
-      {
-        name: 'embeddings',
-        description: 'Create text embeddings',
-        inputSchema: {
-          type: 'object',
-          properties: {
-            model: {
-              type: 'string',
-              description: 'Model to use',
-              default: 'text-embedding-3-small',
-            },
-            input: {
-              type: 'string',
-              description: 'Text to embed',
-            },
+          temperature: {
+            type: 'number',
+            default: 0.7,
+            minimum: 0,
+            maximum: 2,
+            description: 'Sampling temperature (0-2)'
           },
-          required: ['input'],
+          max_tokens: {
+            type: 'number',
+            description: 'Maximum tokens to generate'
+          }
         },
-      },
-    ],
-  };
-});
+        required: ['messages']
+      }
+    },
+    {
+      name: 'list_models',
+      description: 'List available OpenAI models',
+      inputSchema: {
+        type: 'object',
+        properties: {}
+      }
+    },
+    {
+      name: 'embeddings',
+      description: 'Create text embeddings',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          model: {
+            type: 'string',
+            default: 'text-embedding-3-small',
+            description: 'Model to use'
+          },
+          input: {
+            type: 'string',
+            description: 'Text to embed'
+          }
+        },
+        required: ['input']
+      }
+    }
+  ]
+}));
 
-// Handle tool calls
-server.setRequestHandler('tools/call', async (request) => {
-  if (!openaiClient) {
-    throw new Error('OpenAI client not initialized');
-  }
-
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
+  
   try {
     switch (name) {
       case 'chat_completion': {

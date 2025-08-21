@@ -1,220 +1,191 @@
-# OpenAI MCP Bridge
+# OpenAI MCP Server
 
-A self-hosted Model Context Protocol (MCP) server that bridges Claude Code to OpenAI's API, allowing you to use GPT models directly within Claude Code.
+A stdio-based Model Context Protocol (MCP) server that bridges Claude Code to OpenAI's API, allowing you to use GPT models directly within Claude Code.
 
 ## Features
 
-- **Self-hosted**: Deploy on your own SSH server for complete control
-- **Docker Support**: Run in container for easy deployment and isolation
-- **Secure**: API key authentication + OpenAI key passed from client
-- **Simple**: No OAuth, no complex setup
-- **Persistent**: Runs as systemd service or Docker container
-- **HTTPS Ready**: Nginx configuration included for SSL/TLS
+- **Local stdio-based server**: Works directly with Claude Code's MCP implementation
+- **Full OpenAI API access**: Chat completions, embeddings, and model listing
+- **Simple setup**: Just configure and run
+- **Secure**: API key stored locally in environment variables
 
-## Quick Start
+## Prerequisites
 
-### Option 1: Docker Deployment (Recommended)
+- Node.js v18 or higher
+- OpenAI API key
+- Claude Code (Claude Desktop app)
 
-Deploy the MCP bridge as a Docker container on your SSH server:
+## Installation
 
+1. Clone this repository:
 ```bash
-# SSH to the server
-ssh user@allpurpose.ddns.net
-
-# Clone this repository
 git clone https://github.com/tbulle/openai-mcp.git
 cd openai-mcp
-
-# Deploy with Docker
-chmod +x docker-deploy.sh
-./docker-deploy.sh local
-
-# Or use docker-compose
-docker-compose up -d
 ```
 
-The container will:
-- Run on port 3456 (configurable)
-- Auto-restart on failure
-- Generate secure API key
-- Provide health checks
-
-### Option 2: System Service Deployment
-
-### 1. Deploy to Your Server
-
+2. Install dependencies:
 ```bash
-# SSH to the server
-ssh user@allpurpose.ddns.net
-
-# Clone this repository
-git clone https://github.com/tbulle/openai-mcp.git
-cd openai-mcp
-
-# Deploy
-./deploy.sh allpurpose.ddns.net
+npm install
 ```
 
-The script will:
-- Install the MCP bridge on your server
-- Set up systemd service for auto-start
-- Configure nginx for HTTPS (if available)
-- Generate a secure API key
-- Provide Claude Code configuration
+3. Set up your OpenAI API key:
+```bash
+# Create .env file
+echo "OPENAI_API_KEY=sk-proj-YOUR_ACTUAL_KEY_HERE" > .env
+```
 
-### 2. Configure Claude Code
+## Configuration for Claude Code
 
-Add to your Claude Code MCP settings:
+Add this server to your Claude Desktop configuration:
+
+### Windows
+Edit `%APPDATA%\Claude\claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "openai": {
-      "url": "http://allpurpose.ddns.net:3456/sse",
-      "transport": "sse",
-      "headers": {
-        "Authorization": "Bearer YOUR_BRIDGE_API_KEY"
-      },
-      "config": {
-        "openaiApiKey": "sk-YOUR_OPENAI_API_KEY"
+      "command": "node",
+      "args": ["C:/path/to/openai-mcp/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE"
       }
     }
   }
 }
 ```
 
-### 3. Use in Claude Code
+### macOS
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
-Once configured, you can use OpenAI tools:
-
-- `chat_completion` - Chat with GPT models
-- `embeddings` - Generate text embeddings
-- `list_models` - List available models
-
-## Security
-
-- **Bridge API Key**: Authenticates requests to your MCP server
-- **OpenAI API Key**: Passed from Claude Code, never stored on server
-- **HTTPS**: Use nginx + Let's Encrypt for encrypted connections
-
-## Manual Installation
-
-If you prefer manual setup:
-
-```bash
-# On your server
-cd /opt
-sudo git clone <your-repo> openai-mcp
-cd openai-mcp
-
-# Install dependencies
-sudo npm install --production
-
-# Create .env file
-sudo cp .env.example .env
-sudo nano .env  # Add your bridge API key
-
-# Install systemd service
-sudo cp openai-mcp.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable openai-mcp
-sudo systemctl start openai-mcp
-
-# Check status
-sudo systemctl status openai-mcp
+```json
+{
+  "mcpServers": {
+    "openai": {
+      "command": "node",
+      "args": ["/path/to/openai-mcp/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE"
+      }
+    }
+  }
+}
 ```
 
-## Configuration
+### Linux
+Edit `~/.config/Claude/claude_desktop_config.json`:
 
-### Environment Variables (.env)
-
-- `PORT` - Server port (default: 3000)
-- `API_KEY` - Your bridge authentication key
-
-### OpenAI API Key
-
-The OpenAI API key is provided by Claude Code in the MCP configuration, not stored on the server.
-
-## Monitoring
-
-```bash
-# Check service status
-sudo systemctl status openai-mcp
-
-# View logs
-sudo journalctl -u openai-mcp -f
-
-# Test health endpoint
-curl http://localhost:3000/health
+```json
+{
+  "mcpServers": {
+    "openai": {
+      "command": "node",
+      "args": ["/path/to/openai-mcp/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE"
+      }
+    }
+  }
+}
 ```
 
-## Docker Commands
+**Important**: 
+- Replace `/path/to/openai-mcp/` with the actual path where you cloned this repository
+- Replace the API key with your actual OpenAI API key
+- Restart Claude Code after updating the configuration
 
-### Managing the Container
+## Available Tools
 
-```bash
-# View logs
-docker logs -f openai-mcp-bridge
+Once configured, the following tools will be available in Claude Code:
 
-# Stop container
-docker stop openai-mcp-bridge
+### 1. `chat_completion`
+Create chat completions using OpenAI GPT models.
 
-# Start container
-docker start openai-mcp-bridge
+Parameters:
+- `model` (string, optional): Model to use (default: "gpt-3.5-turbo")
+- `messages` (array, required): Array of message objects with `role` and `content`
+- `temperature` (number, optional): Sampling temperature 0-2 (default: 0.7)
+- `max_tokens` (number, optional): Maximum tokens to generate
 
-# Restart container
-docker restart openai-mcp-bridge
-
-# Check status
-docker ps | grep openai-mcp
-
-# Remove container
-docker rm -f openai-mcp-bridge
-
-# Update and rebuild
-git pull
-docker-compose up -d --build
+Example usage in Claude Code:
+```
+Use the chat_completion tool to ask GPT-4 to write a haiku about programming
 ```
 
-### Testing
+### 2. `list_models`
+List all available OpenAI models.
 
-```bash
-# Test health endpoint
-curl http://localhost:3456/health
+No parameters required.
 
-# Test from remote
-curl http://allpurpose.ddns.net:3456/health
+Example usage in Claude Code:
+```
+Use the list_models tool to show me what OpenAI models are available
 ```
 
-## Updating
+### 3. `embeddings`
+Create text embeddings.
 
-### Docker Update
-```bash
-# Pull latest changes
-git pull
+Parameters:
+- `model` (string, optional): Model to use (default: "text-embedding-3-small")
+- `input` (string, required): Text to create embeddings for
 
-# Rebuild and restart
-docker-compose up -d --build
-# Or
-./docker-deploy.sh local
+Example usage in Claude Code:
+```
+Use the embeddings tool to create embeddings for the text "Hello, world!"
 ```
 
-### System Service Update
-```bash
-# Pull latest changes
-cd /opt/openai-mcp
-sudo git pull
+## Testing the Server
 
-# Restart service
-sudo systemctl restart openai-mcp
+You can test the MCP server directly:
+
+```bash
+# Run the test script
+node test-mcp.js
+
+# Or test manually with a single command
+echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"0.1.0","capabilities":{},"clientInfo":{"name":"test","version":"1.0.0"}},"id":1}' | node index.js
 ```
 
 ## Troubleshooting
 
-1. **Connection refused**: Check if service is running
-2. **Unauthorized**: Verify your bridge API key
-3. **OpenAI errors**: Check your OpenAI API key and quota
-4. **SSL issues**: Ensure Let's Encrypt certificates are valid
+1. **Claude Code doesn't show the OpenAI tools**
+   - Make sure you've restarted Claude Code after updating the configuration
+   - Check that the path to index.js is correct in your configuration
+   - Verify Node.js is installed and accessible from the command line
+
+2. **"OPENAI_API_KEY environment variable is required" error**
+   - Ensure you've set the API key in either the .env file or the Claude configuration
+   - Check that the API key is valid and starts with `sk-proj-`
+
+3. **OpenAI API errors**
+   - Verify your API key has sufficient quota
+   - Check that you're using a valid model name
+   - Ensure your API key has access to the requested models
+
+4. **Server initialization fails**
+   - Make sure you're using Node.js v18 or higher
+   - Check that all dependencies are installed (`npm install`)
+   - Look for error messages in Claude Code's developer console
+
+## Development
+
+To run the server in development mode with auto-reload:
+
+```bash
+npm run dev
+```
+
+To run tests:
+
+```bash
+npm test
+```
+
+## Security Notes
+
+- Your OpenAI API key is stored locally and never transmitted except to OpenAI's API
+- The MCP server runs locally on your machine via stdio (standard input/output)
+- No network ports are opened; communication happens through process pipes
 
 ## License
 

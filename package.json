@@ -13,11 +13,11 @@
     "test": "echo '{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"params\":{\"protocolVersion\":\"0.1.0\",\"capabilities\":{}},\"id\":1}' | node index.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.6.0",
+    "@modelcontextprotocol/sdk": "^1.17.3",
+    "dotenv": "^16.4.5",
     "openai": "^4.52.0",
-    "dotenv": "^16.4.5"
+    "zod": "^3.25.76"
   },
-  "devDependencies": {},
   "engines": {
     "node": ">=18.0.0"
   },
