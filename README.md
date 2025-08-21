@@ -18,18 +18,16 @@ A self-hosted Model Context Protocol (MCP) server that bridges Claude Code to Op
 Deploy the MCP bridge as a Docker container on your SSH server:
 
 ```bash
+# SSH to the server
+ssh user@allpurpose.ddns.net
+
 # Clone this repository
-git clone <your-repo>
+git clone https://github.com/tbulle/openai-mcp.git
 cd openai-mcp
 
-# Deploy with Docker (local or remote)
+# Deploy with Docker
 chmod +x docker-deploy.sh
-
-# Deploy locally
 ./docker-deploy.sh local
-
-# Or deploy to remote server
-./docker-deploy.sh your-server.com
 
 # Or use docker-compose
 docker-compose up -d
@@ -46,12 +44,15 @@ The container will:
 ### 1. Deploy to Your Server
 
 ```bash
+# SSH to the server
+ssh user@allpurpose.ddns.net
+
 # Clone this repository
-git clone <your-repo>
+git clone https://github.com/tbulle/openai-mcp.git
 cd openai-mcp
 
-# Deploy to your server
-./deploy.sh your-server.com
+# Deploy
+./deploy.sh allpurpose.ddns.net
 ```
 
 The script will:
@@ -69,7 +70,7 @@ Add to your Claude Code MCP settings:
 {
   "mcpServers": {
     "openai": {
-      "url": "https://your-server.com/mcp/sse",
+      "url": "http://allpurpose.ddns.net:3456/sse",
       "transport": "sse",
       "headers": {
         "Authorization": "Bearer YOUR_BRIDGE_API_KEY"
@@ -182,7 +183,7 @@ docker-compose up -d --build
 curl http://localhost:3456/health
 
 # Test from remote
-curl http://your-server.com:3456/health
+curl http://allpurpose.ddns.net:3456/health
 ```
 
 ## Updating

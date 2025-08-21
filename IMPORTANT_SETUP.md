@@ -1,19 +1,22 @@
-# ⚠️ IMPORTANT: Server Address Configuration
+# 🌐 Server Connection Information
 
-## You MUST Replace These Values
+## Official Server Address
 
-Before deploying, you need to know YOUR server's address. This is NOT provided - you must use your own server.
+The OpenAI MCP Bridge is hosted at:
 
-### What You Need:
+### Server Details:
 
-1. **Your Server's Address** - One of these:
-   - IP Address: `192.168.1.100`, `10.0.0.5`, etc.
-   - Domain Name: `myserver.com`, `vps.example.org`, etc.
-   - Subdomain: `mcp.myserver.com`, `api.mydomain.net`, etc.
+**DNS Address**: `allpurpose.ddns.net`
 
-2. **Your Server's SSH Access**:
-   - Username (often `root`, `ubuntu`, or custom)
-   - SSH port (usually 22)
+**SSH Access**:
+```bash
+ssh user@allpurpose.ddns.net
+```
+
+**MCP Bridge URL for Claude Code**:
+```
+http://allpurpose.ddns.net:3456/sse
+```
 
 ### Examples of Real Addresses:
 
@@ -24,36 +27,29 @@ Before deploying, you need to know YOUR server's address. This is NOT provided -
 | Domain | `ssh user@myserver.com` | `http://myserver.com:3456/sse` |
 | Subdomain | `ssh user@mcp.example.com` | `http://mcp.example.com:3456/sse` |
 
-### Step-by-Step:
+### Step-by-Step Setup:
 
-1. **Find Your Server Address**:
+1. **Connect to the Server**:
    ```bash
-   # If you're already on the server:
-   hostname -I  # Shows IP addresses
-   hostname -f  # Shows full domain name
+   ssh user@allpurpose.ddns.net
    ```
 
-2. **Test SSH Access**:
+2. **Deploy the MCP Bridge** (on the server):
    ```bash
-   # Replace with YOUR actual values:
-   ssh YOUR_USERNAME@YOUR_SERVER_ADDRESS
-   ```
-
-3. **Deploy the MCP Bridge**:
-   ```bash
-   # Once connected to YOUR server:
    git clone https://github.com/tbulle/openai-mcp.git
    cd openai-mcp
    ./docker-deploy.sh local
    ```
 
+3. **Save the API Key** from the deployment output
+
 4. **Configure Claude Code**:
-   Use YOUR server address in the URL:
+   Add this to your Claude Code settings:
    ```json
    {
      "mcpServers": {
        "openai": {
-         "url": "http://YOUR_SERVER_ADDRESS:3456/sse",
+         "url": "http://allpurpose.ddns.net:3456/sse",
          "transport": "sse",
          "headers": {
            "Authorization": "Bearer YOUR_API_KEY_FROM_DEPLOYMENT"
@@ -64,6 +60,11 @@ Before deploying, you need to know YOUR server's address. This is NOT provided -
        }
      }
    }
+   ```
+
+5. **Test the Connection**:
+   ```bash
+   curl http://allpurpose.ddns.net:3456/health
    ```
 
 ## Common Server Providers

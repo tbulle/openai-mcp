@@ -6,10 +6,7 @@
 
 #### A. SSH into your server
 ```bash
-# Replace with YOUR actual server address:
-# - Domain: ssh user@mcp.example.com
-# - IP: ssh user@192.168.1.100
-ssh user@your-server.com
+ssh user@allpurpose.ddns.net
 ```
 
 #### B. Clone and setup the project
@@ -41,9 +38,9 @@ chmod +x docker-deploy.sh deploy.sh
 
 After deployment, you'll need these details:
 
-| Setting | Your Value | Example |
-|---------|------------|---------|
-| **Server Address** | `your-server.com` | `mcp.example.com` or `192.168.1.100` |
+| Setting | Value | Description |
+|---------|-------|-------------|
+| **Server Address** | `allpurpose.ddns.net` | MCP Bridge server |
 | **Port** | `3456` | Default Docker port |
 | **Bridge API Key** | Generated during setup | `a7b9c2d4e5f6...` (32 chars) |
 | **OpenAI API Key** | Your OpenAI key | `sk-proj-abc123...` |
@@ -61,7 +58,7 @@ Add to your Claude Code settings file:
 {
   "mcpServers": {
     "openai": {
-      "url": "http://YOUR_SERVER:3456/sse",
+      "url": "http://allpurpose.ddns.net:3456/sse",
       "transport": "sse",
       "headers": {
         "Authorization": "Bearer YOUR_BRIDGE_API_KEY"
@@ -81,7 +78,7 @@ Create `.claude/claude.json` in your project:
 {
   "mcpServers": {
     "openai": {
-      "url": "http://YOUR_SERVER:3456/sse",
+      "url": "http://allpurpose.ddns.net:3456/sse",
       "transport": "sse",
       "headers": {
         "Authorization": "Bearer YOUR_BRIDGE_API_KEY"
@@ -99,7 +96,7 @@ Create `.claude/claude.json` in your project:
 #### From your local machine:
 ```bash
 # Test if server is accessible
-curl http://YOUR_SERVER:3456/health
+curl http://allpurpose.ddns.net:3456/health
 
 # Should return:
 {"status":"ok","service":"openai-mcp-bridge"}
@@ -113,11 +110,11 @@ Once configured, you can use commands like:
 
 ## 📋 Complete Example
 
-Let's say your server is `mcp.myserver.com`:
+Using the official server at `allpurpose.ddns.net`:
 
 ### 1. On the server:
 ```bash
-ssh user@mcp.myserver.com
+ssh user@allpurpose.ddns.net
 cd ~/services/openai-mcp
 ./docker-deploy.sh local
 ```
@@ -136,7 +133,7 @@ Edit Claude Code config:
 {
   "mcpServers": {
     "openai": {
-      "url": "http://mcp.myserver.com:3456/sse",
+      "url": "http://allpurpose.ddns.net:3456/sse",
       "transport": "sse",
       "headers": {
         "Authorization": "Bearer a7b9c2d4e5f6g8h9i0j1k2l3m4n5o6p7"
@@ -151,7 +148,7 @@ Edit Claude Code config:
 
 ### 3. Test:
 ```bash
-curl http://mcp.myserver.com:3456/health
+curl http://allpurpose.ddns.net:3456/health
 ```
 
 ## 🔧 Available Tools in Claude Code

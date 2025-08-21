@@ -4,9 +4,8 @@
 
 ### 1️⃣ On Your Server
 ```bash
-# SSH to your server (use YOUR actual server address)
-# Example: ssh user@192.168.1.100 or ssh user@mcp.mydomain.com
-ssh user@your-server.com
+# SSH to the server
+ssh user@allpurpose.ddns.net
 
 # Get the code
 git clone https://github.com/tbulle/openai-mcp.git
@@ -26,7 +25,7 @@ Configuration for Claude Code:
 {
   "mcpServers": {
     "openai": {
-      "url": "http://your-server.com:3456/sse",
+      "url": "http://allpurpose.ddns.net:3456/sse",
       "transport": "sse",
       "headers": {
         "Authorization": "Bearer a7b9c2d4e5f6g8h9..."
@@ -54,7 +53,7 @@ Configuration for Claude Code:
 ### 4️⃣ Test It
 ```bash
 # From your local machine
-curl http://your-server.com:3456/health
+curl http://allpurpose.ddns.net:3456/health
 
 # Should return: {"status":"ok","service":"openai-mcp-bridge"}
 ```
