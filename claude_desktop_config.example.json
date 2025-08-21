@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "openai": {
+      "command": "node",
+      "args": ["C:/Projects/TB/openai-mcp/index.js"],
+      "env": {
+        "OPENAI_API_KEY": "sk-proj-YOUR_ACTUAL_OPENAI_API_KEY_HERE"
+      }
+    }
+  }
+}
